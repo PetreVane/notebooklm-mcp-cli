@@ -67,20 +67,79 @@ If your AI assistant has Chrome DevTools MCP available:
 
 That's it! Cookies are cached to `~/.notebooklm-consumer/auth.json`.
 
-### Option 2: Manual Extraction
+### Option 2: Manual Extraction (Without Chrome DevTools MCP)
 
-1. Go to `notebooklm.google.com` in Chrome and log in
-2. Open DevTools (F12) > Network tab
-3. Refresh or perform any action
-4. Find any request to `notebooklm.google.com`
-5. Copy the entire `Cookie` header value
-6. Set environment variable:
+If you don't have Chrome DevTools MCP available, you can extract cookies manually and save them via the MCP tool.
 
-```bash
-export NOTEBOOKLM_COOKIES="SID=xxx; HSID=xxx; SSID=xxx; ..."
+**Step 1: Open Chrome and log into NotebookLM**
+- Go to `https://notebooklm.google.com`
+- Make sure you're logged in and can see your notebooks
+
+**Step 2: Open Chrome DevTools**
+- Press `F12` (Windows/Linux) or `Cmd+Option+I` (Mac)
+- Click on the **Network** tab at the top
+
+**Step 3: Filter for API requests**
+- In the filter box at the top, type: `batchexecute`
+- This filters to show only NotebookLM API calls
+
+**Step 4: Trigger a request**
+- Click on any notebook in NotebookLM
+- You'll see new requests appear in the Network tab with "batchexecute" in the name
+
+**Step 5: Open a request to see headers**
+- Click on any "batchexecute" request in the list
+- In the right panel, make sure **Headers** tab is selected
+- Scroll down to **Request Headers** section
+
+**Step 6: Copy the Cookie header value**
+- Find the line that says `cookie:` (look carefully, there are many headers)
+- The value is a LONG string with many cookies separated by semicolons
+- **Right-click on the value** → Select **"Copy value"** (NOT "Copy as cURL")
+
+**What you should see:**
+```
+SID=xxx; HSID=xxx; SSID=xxx; APISID=xxx; SAPISID=xxx; __Secure-1PSID=xxx; ...
+```
+(You'll have 15-20 different cookies - this is normal!)
+
+**Step 7: Save via MCP tool**
+
+Now use your AI assistant to call the `save_auth_tokens` MCP tool:
+
+```
+save_auth_tokens(cookies="<paste-the-entire-cookie-string-here>")
 ```
 
-> **Note:** You no longer need to extract CSRF token or session ID manually - they are auto-extracted from the page when the MCP starts.
+This saves the cookies to `~/.notebooklm-consumer/auth.json` where the MCP will read them.
+
+**Step 8: Verify it worked**
+- Ask your AI assistant to call `notebook_list()`
+- If you see your notebooks, auth is working!
+
+<details>
+<summary>⚠️ Common Mistakes</summary>
+
+**Don't do these:**
+- ❌ Copy as cURL - Use "Copy value" instead
+- ❌ Copy just one cookie like `SID=xxx` - You need ALL cookies in the string
+- ❌ Include the word "cookie:" - Only copy what comes AFTER `cookie:`
+- ❌ Use old cookies - Make sure you're currently logged into NotebookLM
+- ❌ Copy from the wrong request - Look for `batchexecute` requests specifically
+
+**Signs you did it wrong:**
+- Getting "401 Unauthorized" errors
+- Getting "403 Forbidden" errors
+- Empty notebook list when you have notebooks
+
+**If auth fails:**
+- Extract fresh cookies (they may have expired)
+- Make sure you copied the ENTIRE cookie string
+- Verify you're logged into the correct Google account
+
+</details>
+
+> **Note:** You no longer need to extract CSRF token or session ID manually - they are auto-extracted automatically when the MCP starts.
 
 ## MCP Configuration
 
