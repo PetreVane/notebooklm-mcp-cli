@@ -219,7 +219,7 @@ Configure notebook [notebook_id] chat settings:
 
 ---
 
-## Test Group 4: Research
+## Test Group 4: Research (Fast Mode)
 
 ### Test 4.1 - Start Fast Research (Web)
 **Tool:** `research_start`
@@ -235,7 +235,7 @@ Start fast web research for "OpenShift container platform" in notebook [notebook
 
 ---
 
-### Test 4.2 - Check Research Status
+### Test 4.2 - Check Fast Research Status
 **Tool:** `research_status`
 
 **Prompt:**
@@ -243,11 +243,16 @@ Start fast web research for "OpenShift container platform" in notebook [notebook
 Check the status of research for notebook [notebook_id]. Poll until complete.
 ```
 
-**Expected:** Research completes with list of discovered sources.
+**Expected:**
+- Research completes with `status: completed`
+- `mode: fast`
+- `source_count`: ~10 sources (fast mode discovers ~10 sources)
+- Each source has `url`, `title`, `description`
+- No `report` field (fast mode doesn't generate reports)
 
 ---
 
-### Test 4.3 - Import Research Sources
+### Test 4.3 - Import Fast Research Sources
 **Tool:** `research_import`
 
 **Prompt:**
@@ -256,6 +261,23 @@ Import all discovered sources from research task [task_id] into notebook [notebo
 ```
 
 **Expected:** Sources imported successfully.
+
+---
+
+### Test 4.4 - START Deep Research (Run in Background)
+**Tool:** `research_start`
+
+**Prompt:**
+```
+Start deep web research for "AI ROI return on investment" in notebook [notebook_id].
+Mode: deep
+```
+
+**Expected:** Research task started with task_id and message about 3-5 minute duration.
+
+**Save:** Note the `task_id` for Test 9.1.
+
+**IMPORTANT:** Deep research takes 3-5 minutes to complete. **Do NOT wait here.** Continue with Test Group 5-8 while deep research runs in the background. We'll verify and import results in Test Group 9.
 
 ---
 
@@ -488,9 +510,44 @@ If any are stale, sync them using source_sync_drive.
 
 ---
 
-## Test Group 9: Cleanup
+## Test Group 9: Deep Research Verification (Background Task Complete)
 
-### Test 9.1 - Delete Notebook (with confirmation)
+**TIMING:** By now, the deep research started in Test 4.4 should be complete (3-5 minutes have passed).
+
+### Test 9.1 - Check Deep Research Status
+**Tool:** `research_status`
+
+**Prompt:**
+```
+Check the status of deep research for notebook [notebook_id]. Set max_wait to 60 seconds.
+```
+
+**Expected:**
+- Research completes with `status: completed`
+- `mode: deep`
+- `source_count`: ~40-50 sources (deep mode discovers more sources)
+- Sources have `title` and `result_type_name: deep_report`
+- **CRITICAL:** `report` field present with full markdown research report (10,000+ chars)
+
+**Validation:** If `source_count` is 0 or `report` is empty, there may be a parsing bug. This was fixed in the deep research parsing update.
+
+---
+
+### Test 9.2 - Import Deep Research Sources
+**Tool:** `research_import`
+
+**Prompt:**
+```
+Import all discovered sources from deep research task [task_id from Test 4.4] into notebook [notebook_id].
+```
+
+**Expected:** Sources imported successfully with count matching source_count from Test 9.1.
+
+---
+
+## Test Group 10: Cleanup
+
+### Test 10.1 - Delete Notebook (with confirmation)
 **Tool:** `notebook_delete`
 
 **Prompt:**
@@ -532,7 +589,9 @@ After completing all tests, verify:
 
 **AI Features (2):** notebook_query, chat_configure
 
-**Research (3):** research_start, research_status, research_import
+**Research (3 tools, 6 tests):** research_start, research_status, research_import
+- Tests 4.1-4.3: Fast research (~10 sources, 30 seconds)
+- Tests 4.4-4.6: Deep research (~40+ sources with AI report, 3-5 minutes)
 
 **Studio Audio/Video (4):** audio_overview_create, video_overview_create, studio_status, studio_delete
 
@@ -564,17 +623,21 @@ Use these prompts sequentially with another AI tool that has access to the MCP:
 12. `Start fast web research for "OpenShift" in notebook [id]`
 13. `Check research status for notebook [id]`
 14. `Import all research sources from task [task_id] into notebook [id]`
-15. `Create brief audio overview for notebook [id] (show settings first)`
-16. `Confirmed - create it with confirm=True`
-17. `Create brief video overview for notebook [id] (show settings first)`
-18. `Confirmed - create it`
-19. `Check studio status for notebook [id]`
-20. `Create landscape infographic for notebook [id] (show settings first)`
-21. `Create short slide deck for notebook [id] (show settings first)`
-22. `Create Briefing Doc report for notebook [id] (show settings first)`
-23. `Create medium difficulty flashcards for notebook [id] (show settings first)`
-24. `Create mind map titled "AI Concepts" for notebook [id] (show settings first)`
-25. `List all mind maps in notebook [id]`
-26. `Delete audio artifact [artifact_id] from notebook [id] (show warning first)`
-27. `Confirmed - delete it with confirm=True`
-28. `Delete notebook [id] (show warning first)` → `Confirmed - delete with confirm=True`
+15. `Start DEEP web research for "AI ROI" in notebook [id]` ← **Kicks off 3-5 min background task**
+16. `Create brief audio overview for notebook [id] (show settings first)`
+17. `Confirmed - create it with confirm=True`
+18. `Create brief video overview for notebook [id] (show settings first)`
+19. `Confirmed - create it`
+20. `Check studio status for notebook [id]`
+21. `Create landscape infographic for notebook [id] (show settings first)`
+22. `Create short slide deck for notebook [id] (show settings first)`
+23. `Create Briefing Doc report for notebook [id] (show settings first)`
+24. `Create medium difficulty flashcards for notebook [id] (show settings first)`
+25. `Create mind map titled "AI Concepts" for notebook [id] (show settings first)`
+26. `List all mind maps in notebook [id]`
+27. `Check deep research status for notebook [id]` ← **By now, deep research should be complete**
+28. `Verify source_count > 0 and report field has content`
+29. `Import all deep research sources into notebook [id]`
+30. `Delete audio artifact [artifact_id] from notebook [id] (show warning first)`
+31. `Confirmed - delete it with confirm=True`
+32. `Delete notebook [id] (show warning first)` → `Confirmed - delete with confirm=True`

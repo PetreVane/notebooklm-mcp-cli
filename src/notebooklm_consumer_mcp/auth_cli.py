@@ -268,63 +268,38 @@ def extract_session_id_from_html(html: str) -> str:
     return ""
 
 
-def is_chrome_profile_locked() -> bool:
-    """Check if Chrome's default profile is locked (Chrome is using it).
+def is_chrome_profile_locked(profile_dir: str | None = None) -> bool:
+    """Check if a Chrome profile is locked (Chrome is using it).
+
+    Args:
+        profile_dir: The profile directory to check. If None, checks our
+                     notebooklm-consumer profile, NOT the default Chrome profile.
 
     This is more reliable than process detection because:
     - Works across all platforms
     - Detects if Chrome is using the specific profile we need
     - The lock file only exists while Chrome has the profile open
     """
-    user_data_dir = get_chrome_user_data_dir()
-    if not user_data_dir:
-        return False
+    if profile_dir is None:
+        # Check OUR profile, not the default Chrome profile
+        # We use a separate profile so we can run alongside the user's main Chrome
+        profile_dir = str(Path.home() / ".notebooklm-consumer" / "chrome-profile")
 
     # Chrome creates a "SingletonLock" file when the profile is in use
-    lock_file = Path(user_data_dir) / "SingletonLock"
+    lock_file = Path(profile_dir) / "SingletonLock"
     return lock_file.exists()
 
 
-def is_chrome_running() -> bool:
-    """Check if Chrome is already running (without debugging).
+def is_our_chrome_profile_in_use() -> bool:
+    """Check if OUR Chrome profile is already in use.
 
-    Uses multiple detection methods for reliability.
+    We use a separate profile at ~/.notebooklm-consumer/chrome-profile
+    so we can run alongside the user's main Chrome browser.
+
+    This only checks if our specific profile is locked, NOT if Chrome
+    is running in general. Users can have their main Chrome open.
     """
-    import subprocess
-    import platform
-
-    # First, check if the profile is locked (most reliable)
-    if is_chrome_profile_locked():
-        return True
-
-    # Fallback to process detection
-    system = platform.system()
-    try:
-        if system == "Darwin":
-            result = subprocess.run(
-                ["pgrep", "-f", "Google Chrome"],
-                capture_output=True, text=True
-            )
-            return result.returncode == 0
-        elif system == "Linux":
-            # Try multiple patterns for Linux
-            for pattern in ["google-chrome", "chromium", "chrome"]:
-                result = subprocess.run(
-                    ["pgrep", "-f", pattern],
-                    capture_output=True, text=True
-                )
-                if result.returncode == 0:
-                    return True
-            return False
-        elif system == "Windows":
-            result = subprocess.run(
-                ["tasklist", "/FI", "IMAGENAME eq chrome.exe"],
-                capture_output=True, text=True
-            )
-            return "chrome.exe" in result.stdout
-    except Exception:
-        pass
-    return False
+    return is_chrome_profile_locked()  # Already checks our profile by default
 
 
 def run_auth_flow(port: int = CDP_DEFAULT_PORT, auto_launch: bool = True) -> AuthTokens | None:
@@ -342,20 +317,19 @@ def run_auth_flow(port: int = CDP_DEFAULT_PORT, auto_launch: bool = True) -> Aut
     debugger_url = get_chrome_debugger_url(port)
 
     if not debugger_url and auto_launch:
-        # Check if Chrome is running without debugging
-        if is_chrome_running():
-            print("Chrome is running but without remote debugging enabled.")
+        # Check if our specific profile is already in use
+        if is_our_chrome_profile_in_use():
+            print("The NotebookLM auth profile is already in use.")
             print()
-            print("Options:")
+            print("This means a previous auth Chrome window is still open.")
+            print("Close that window and try again, or use file mode:")
             print()
-            print("  1. Use file mode (RECOMMENDED):")
-            print("     notebooklm-consumer-auth --file")
-            print()
-            print("  2. Close Chrome completely, then run this command again")
+            print("  notebooklm-consumer-auth --file")
             print()
             return None
 
-        print("Launching Chrome with NotebookLM profile...")
+        # We can launch our separate Chrome profile even if user's main Chrome is open
+        print("Launching Chrome with NotebookLM auth profile...")
         print("(First time: you'll need to log in to your Google account)")
         print()
         # Launch with visible window so user can log in

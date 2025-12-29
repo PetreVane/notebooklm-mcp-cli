@@ -231,9 +231,9 @@ class ConsumerNotebookLMClient:
         import random
         self._reqid_counter = random.randint(100000, 999999)
 
-        # Auto-refresh tokens if not provided
-        if not self.csrf_token:
-            self._refresh_auth_tokens()
+        # ALWAYS refresh CSRF token on initialization - they expire quickly (minutes)
+        # Even if a CSRF token was provided, it may be stale
+        self._refresh_auth_tokens()
 
     def _refresh_auth_tokens(self) -> None:
         """
@@ -1376,7 +1376,8 @@ class ConsumerNotebookLMClient:
         research_tasks = []
 
         for task_data in result:
-            if not isinstance(task_data, list) or len(task_data) < 3:
+            # task_data structure: [task_id, task_info] (only 2 elements for deep research)
+            if not isinstance(task_data, list) or len(task_data) < 2:
                 continue
 
             task_id = task_data[0]
@@ -1401,18 +1402,47 @@ class ConsumerNotebookLMClient:
 
             sources_data = []
             summary = ""
-            if isinstance(sources_and_summary, list) and len(sources_and_summary) >= 2:
-                sources_data = sources_and_summary[0] if isinstance(sources_and_summary[0], list) else []
-                summary = sources_and_summary[1] if isinstance(sources_and_summary[1], str) else ""
+            report = ""
 
-            # Parse sources - sources_data should be [[url, title, desc, type], ...]
+            # Handle different structures for fast vs deep research
+            if isinstance(sources_and_summary, list) and len(sources_and_summary) >= 1:
+                # sources_and_summary[0] is always the sources list
+                sources_data = sources_and_summary[0] if isinstance(sources_and_summary[0], list) else []
+                # For fast research, summary may be at [1]
+                if len(sources_and_summary) >= 2 and isinstance(sources_and_summary[1], str):
+                    summary = sources_and_summary[1]
+
+            # Parse sources - structure differs between fast and deep research
+            # Fast research: [url, title, desc, type, ...]
+            # Deep research: [None, title, None, type, None, None, [report], ...]
             sources = []
             if isinstance(sources_data, list) and len(sources_data) > 0:
                 for idx, src in enumerate(sources_data):
-                    if isinstance(src, list) and len(src) >= 3:
-                        url = src[0] if isinstance(src[0], str) else ""
+                    if not isinstance(src, list) or len(src) < 2:
+                        continue
+
+                    # Check if this is deep research format (src[0] is None, src[1] is title)
+                    if src[0] is None and len(src) > 1 and isinstance(src[1], str):
+                        # Deep research format
                         title = src[1] if isinstance(src[1], str) else ""
-                        desc = src[2] if isinstance(src[2], str) else ""
+                        result_type = src[3] if len(src) > 3 and isinstance(src[3], int) else 5
+                        # Report is at src[6][0] for deep research
+                        if len(src) > 6 and isinstance(src[6], list) and len(src[6]) > 0:
+                            report = src[6][0] if isinstance(src[6][0], str) else ""
+
+                        sources.append({
+                            "index": idx,
+                            "url": "",  # Deep research doesn't have URLs in source list
+                            "title": title,
+                            "description": "",
+                            "result_type": result_type,
+                            "result_type_name": self._get_result_type_name(result_type),
+                        })
+                    elif isinstance(src[0], str) or len(src) >= 3:
+                        # Fast research format: [url, title, desc, type, ...]
+                        url = src[0] if isinstance(src[0], str) else ""
+                        title = src[1] if len(src) > 1 and isinstance(src[1], str) else ""
+                        desc = src[2] if len(src) > 2 and isinstance(src[2], str) else ""
                         result_type = src[3] if len(src) > 3 and isinstance(src[3], int) else 1
 
                         sources.append({
@@ -1436,6 +1466,7 @@ class ConsumerNotebookLMClient:
                 "sources": sources,
                 "source_count": len(sources),
                 "summary": summary,
+                "report": report,  # Deep research report (markdown)
             })
 
         if not research_tasks:
