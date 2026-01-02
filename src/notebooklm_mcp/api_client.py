@@ -260,8 +260,7 @@ class NotebookLMClient:
             # Check if redirected to login (cookies expired)
             if "accounts.google.com" in str(response.url):
                 raise ValueError(
-                    "Cookies have expired. Please re-authenticate by extracting fresh cookies "
-                    "from Chrome DevTools and calling save_auth_tokens."
+                    "Cookies have expired. Please re-authenticate by running 'notebooklm-mcp-auth'."
                 )
 
             if response.status_code != 200:
