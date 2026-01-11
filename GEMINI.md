@@ -38,7 +38,20 @@ uv tool install .
 ```bash
 notebooklm-mcp-auth
 ```
-This launches Chrome, you log in, and cookies are extracted automatically.
+This launches Chrome, you log in, and cookies are extracted automatically. Your login is saved to a Chrome profile for future use.
+
+**Auto-refresh (v0.1.9+):**
+The server now automatically handles token expiration:
+1. Refreshes CSRF tokens on expiry (immediate)
+2. Reloads cookies from disk if updated externally
+3. Runs headless Chrome auth if profile has saved login
+
+If headless auth fails (Google login fully expired), you'll see a message to run `notebooklm-mcp-auth` again.
+
+**Explicit refresh (MCP tool):**
+```
+refresh_auth()  # Reload tokens from disk or run headless auth
+```
 
 **Fallback: Manual extraction (if CLI fails)**
 If the automated tool doesn't work, extract cookies via Chrome DevTools:
@@ -51,7 +64,7 @@ If the automated tool doesn't work, extract cookies via Chrome DevTools:
 export NOTEBOOKLM_COOKIES="SID=xxx; HSID=xxx; SSID=xxx; ..."
 ```
 
-Cookies last for weeks. When they expire, run `notebooklm-mcp-auth` again.
+Cookies last for weeks. The server auto-refreshes as long as Chrome profile login is valid.
 
 ## Development Workflow
 

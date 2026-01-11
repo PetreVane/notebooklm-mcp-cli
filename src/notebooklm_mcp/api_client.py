@@ -460,11 +460,14 @@ class NotebookLMClient:
         path: str = "/",
         timeout: float | None = None,
         _retry: bool = False,
+        _deep_retry: bool = False,
     ) -> Any:
         """Execute an RPC call and return the extracted result.
 
-        Includes automatic retry on auth failures (401/403). If the first attempt
-        fails with an auth error, refreshes CSRF/session tokens and retries once.
+        Includes automatic retry on auth failures with three-layer recovery:
+        1. Refresh CSRF/session tokens (fast, handles token expiry)
+        2. Reload cookies from disk (handles external re-authentication)
+        3. Run headless auth (auto-refresh if Chrome profile has saved login)
         """
         client = self._get_client()
         body = self._build_request_body(rpc_id, params)
@@ -486,14 +489,69 @@ class NotebookLMClient:
             is_http_auth = isinstance(e, httpx.HTTPStatusError) and e.response.status_code in (401, 403)
             is_rpc_auth = isinstance(e, AuthenticationError)
             
-            if (is_http_auth or is_rpc_auth) and not _retry:
-                # Token likely expired - refresh and retry once
-                self._refresh_auth_tokens()
-                # Reset client to pick up new tokens in headers
-                self._client = None
-                return self._call_rpc(rpc_id, params, path, timeout, _retry=True)
-            # Re-raise if already retried or different error
-            raise
+            if not (is_http_auth or is_rpc_auth):
+                # Not an auth error, re-raise immediately
+                raise
+            
+            # Layer 1: Refresh CSRF/session tokens (first retry only)
+            if not _retry:
+                try:
+                    self._refresh_auth_tokens()
+                    self._client = None
+                    return self._call_rpc(rpc_id, params, path, timeout, _retry=True)
+                except ValueError:
+                    # CSRF refresh failed (cookies expired) - continue to layer 2
+                    pass
+            
+            # Layer 2 & 3: Reload from disk or run headless auth (deep retry)
+            if not _deep_retry:
+                if self._try_reload_or_headless_auth():
+                    self._client = None
+                    return self._call_rpc(rpc_id, params, path, timeout, _retry=True, _deep_retry=True)
+            
+            # All recovery attempts failed
+            raise AuthenticationError(
+                "Authentication expired. Run 'notebooklm-mcp-auth' in your terminal to re-authenticate."
+            )
+
+    def _try_reload_or_headless_auth(self) -> bool:
+        """Try to recover authentication by reloading from disk or running headless auth.
+        
+        Returns True if new valid tokens were obtained, False otherwise.
+        """
+        from .auth import load_cached_tokens, get_cache_path
+        
+        # Check if auth.json has fresher tokens
+        cache_path = get_cache_path()
+        if cache_path.exists():
+            cached = load_cached_tokens()
+            if cached and cached.extracted_at > 0:
+                # Check if cached tokens are newer than our current ones
+                # (meaning someone ran notebooklm-mcp-auth externally)
+                import time
+                current_time = time.time()
+                token_age = current_time - cached.extracted_at
+                
+                # If tokens are less than 5 minutes old, they're probably fresh
+                if token_age < 300:
+                    self.cookies = cached.cookies
+                    self.csrf_token = cached.csrf_token
+                    self._session_id = cached.session_id
+                    return True
+        
+        # Try headless auth if Chrome profile exists
+        try:
+            from .auth_cli import run_headless_auth
+            tokens = run_headless_auth()
+            if tokens:
+                self.cookies = tokens.cookies
+                self.csrf_token = tokens.csrf_token
+                self._session_id = tokens.session_id
+                return True
+        except Exception:
+            pass
+        
+        return False
 
     # =========================================================================
     # Conversation Management (for query follow-ups)

@@ -62,6 +62,52 @@ def get_client() -> NotebookLMClient:
 
 
 @mcp.tool()
+def refresh_auth() -> dict[str, Any]:
+    """Reload auth tokens from disk or run headless re-authentication.
+    
+    Call this after running notebooklm-mcp-auth to pick up new tokens,
+    or to attempt automatic re-authentication if Chrome profile has saved login.
+    
+    Returns status indicating if tokens were refreshed successfully.
+    """
+    global _client
+    
+    try:
+        # Try reloading from disk first
+        from .auth import load_cached_tokens
+        
+        cached = load_cached_tokens()
+        if cached:
+            # Reset client to force re-initialization with fresh tokens
+            _client = None
+            get_client()  # This will use the cached tokens
+            return {
+                "status": "success",
+                "message": "Auth tokens reloaded from disk cache.",
+            }
+        
+        # Try headless auth if Chrome profile exists
+        try:
+            from .auth_cli import run_headless_auth
+            tokens = run_headless_auth()
+            if tokens:
+                _client = None
+                get_client()
+                return {
+                    "status": "success", 
+                    "message": "Auth tokens refreshed via headless Chrome.",
+                }
+        except Exception:
+            pass
+        
+        return {
+            "status": "error",
+            "error": "No cached tokens found. Run 'notebooklm-mcp-auth' to authenticate.",
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+@mcp.tool()
 def notebook_list(max_results: int = 100) -> dict[str, Any]:
     """List all notebooks.
 

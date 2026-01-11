@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.9] - 2026-01-11
+
+### Added
+- **Automatic re-authentication** - Server now survives token expirations without restart
+  - Three-layer recovery: CSRF refresh → disk reload → headless Chrome auth
+  - Works with long-running MCP sessions (e.g., MCP Super Assistant proxy)
+- `refresh_auth` MCP tool for explicit token reload
+- `run_headless_auth()` function for background authentication (if Chrome profile has saved login)
+- `has_chrome_profile()` helper to check if profile exists
+
+### Changed
+- `launch_chrome()` now returns `subprocess.Popen` handle instead of `bool` for cleanup control
+- `_call_rpc()` enhanced with `_deep_retry` parameter for multi-layer auth recovery
+
 ## [0.1.8] - 2026-01-10
 
 ### Added

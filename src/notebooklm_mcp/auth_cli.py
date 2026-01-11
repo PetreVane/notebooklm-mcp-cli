@@ -58,7 +58,7 @@ def get_chrome_user_data_dir() -> str | None:
     return None
 
 
-def launch_chrome(port: int, headless: bool = False) -> bool:
+def launch_chrome(port: int, headless: bool = False) -> "subprocess.Popen | None":
     """Launch Chrome with remote debugging enabled.
 
     Args:
@@ -66,7 +66,7 @@ def launch_chrome(port: int, headless: bool = False) -> bool:
         headless: If True, launch in headless mode (no visible window)
 
     Returns:
-        True if Chrome was launched, False if failed
+        Popen process handle if Chrome was launched, None if failed
     """
     import platform
     import subprocess
@@ -86,12 +86,12 @@ def launch_chrome(port: int, headless: bool = False) -> bool:
                 break
         if not chrome_path:
             print(f"Chrome not found. Tried: {', '.join(chrome_candidates)}")
-            return False
+            return None
     elif system == "Windows":
         chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
     else:
         print(f"Unsupported platform: {system}")
-        return False
+        return None
 
     # Chrome 136+ requires a non-default user-data-dir for remote debugging
     # We use a persistent directory so Google login is remembered across runs
@@ -122,10 +122,11 @@ def launch_chrome(port: int, headless: bool = False) -> bool:
             _, stderr = process.communicate()
             if stderr:
                 print(f"Chrome error: {stderr.decode()[:500]}")
-        return True
+            return None
+        return process
     except Exception as e:
         print(f"Failed to launch Chrome: {e}")
-        return False
+        return None
 
 
 def get_chrome_debugger_url(port: int = CDP_DEFAULT_PORT) -> str | None:
@@ -310,6 +311,115 @@ def is_our_chrome_profile_in_use() -> bool:
     is running in general. Users can have their main Chrome open.
     """
     return is_chrome_profile_locked()  # Already checks our profile by default
+
+
+def has_chrome_profile() -> bool:
+    """Check if a Chrome profile with saved login exists.
+    
+    Returns True if the profile directory exists and has login cookies,
+    indicating that the user has previously authenticated.
+    """
+    profile_dir = Path.home() / ".notebooklm-mcp" / "chrome-profile"
+    # Check for Cookies file which indicates the profile has been used
+    cookies_file = profile_dir / "Default" / "Cookies"
+    return cookies_file.exists()
+
+
+def run_headless_auth(port: int = 9223, timeout: int = 30) -> AuthTokens | None:
+    """Run authentication in headless mode (no user interaction).
+    
+    This only works if the Chrome profile already has saved Google login.
+    The Chrome process is automatically terminated after token extraction.
+    
+    Args:
+        port: Chrome DevTools port (use different port to avoid conflicts)
+        timeout: Maximum time to wait for auth extraction
+        
+    Returns:
+        AuthTokens if successful, None if failed or no saved login
+    """
+    import subprocess
+    
+    # Check if profile exists with saved login
+    if not has_chrome_profile():
+        return None
+    
+    # Check if our profile is already in use
+    if is_our_chrome_profile_in_use():
+        return None
+    
+    chrome_process: subprocess.Popen | None = None
+    try:
+        # Launch Chrome in headless mode
+        chrome_process = launch_chrome(port, headless=True)
+        if not chrome_process:
+            return None
+        
+        # Wait for Chrome debugger to be ready
+        debugger_url = None
+        for _ in range(5):  # Try up to 5 times
+            debugger_url = get_chrome_debugger_url(port)
+            if debugger_url:
+                break
+            time.sleep(1)
+        
+        if not debugger_url:
+            return None
+        
+        # Find or create NotebookLM page
+        page = find_or_create_notebooklm_page(port)
+        if not page:
+            return None
+        
+        ws_url = page.get("webSocketDebuggerUrl")
+        if not ws_url:
+            return None
+        
+        # Check if logged in by URL
+        current_url = get_current_url(ws_url)
+        if not check_if_logged_in_by_url(current_url):
+            # Not logged in - headless can't help
+            return None
+        
+        # Extract cookies
+        cookies_list = get_page_cookies(ws_url)
+        cookies = {c["name"]: c["value"] for c in cookies_list}
+        
+        if not validate_cookies(cookies):
+            return None
+        
+        # Get page HTML for CSRF extraction
+        html = get_page_html(ws_url)
+        csrf_token = extract_csrf_from_page_source(html)
+        session_id = extract_session_id_from_html(html)
+        
+        # Create and save tokens
+        tokens = AuthTokens(
+            cookies=cookies,
+            csrf_token=csrf_token or "",
+            session_id=session_id or "",
+            extracted_at=time.time(),
+        )
+        save_tokens_to_cache(tokens)
+        
+        return tokens
+        
+    except Exception:
+        return None
+        
+    finally:
+        # IMPORTANT: Always terminate headless Chrome
+        if chrome_process:
+            try:
+                chrome_process.terminate()
+                chrome_process.wait(timeout=5)
+            except Exception:
+                # Force kill if terminate didn't work
+                try:
+                    chrome_process.kill()
+                except Exception:
+                    pass
+
 
 
 def run_auth_flow(port: int = CDP_DEFAULT_PORT, auto_launch: bool = True) -> AuthTokens | None:

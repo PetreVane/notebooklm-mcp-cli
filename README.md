@@ -41,6 +41,7 @@ An MCP server for **NotebookLM** (notebooklm.google.com).
 | `slide_deck_create` | Generate slide decks (requires confirmation) |
 | `studio_status` | Check studio artifact generation status |
 | `studio_delete` | Delete studio artifacts (requires confirmation) |
+| `refresh_auth` | Reload auth tokens from disk or run headless re-auth |
 | `save_auth_tokens` | Save cookies for authentication |
 
 ## Important Disclaimer
@@ -333,11 +334,18 @@ Simply chat with your AI tool (Claude Code, Cursor, Gemini CLI) using natural la
 
 | Component | Duration | Refresh |
 |-----------|----------|---------|
-| Cookies | ~2-4 weeks | Re-extract from Chrome when expired |
-| CSRF Token | Per MCP session | Auto-extracted on MCP start |
+| Cookies | ~2-4 weeks | Auto-refresh via headless Chrome (if profile saved) |
+| CSRF Token | ~minutes | Auto-refreshed on every request failure |
 | Session ID | Per MCP session | Auto-extracted on MCP start |
 
-When cookies expire, you'll see an auth error. Run `notebooklm-mcp-auth` to refresh authentication automatically.
+**v0.1.9+**: The server now automatically handles token expiration:
+1. Refreshes CSRF tokens immediately when expired
+2. Reloads cookies from disk if updated externally
+3. Runs headless Chrome auth if profile has saved login
+
+You can also call `refresh_auth()` to explicitly reload tokens.
+
+If automatic refresh fails (Google login fully expired), run `notebooklm-mcp-auth` again.
 
 ## Troubleshooting
 
