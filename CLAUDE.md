@@ -17,8 +17,14 @@ uv tool install .
 # Reinstall after code changes (ALWAYS clean cache first)
 uv cache clean && uv tool install --force .
 
-# Run the MCP server
+# Run the MCP server (stdio)
 notebooklm-mcp
+
+# Run with Debug logging
+notebooklm-mcp --debug
+
+# Run as HTTP server
+notebooklm-mcp --transport http --port 8000
 
 # Run tests
 uv run pytest
