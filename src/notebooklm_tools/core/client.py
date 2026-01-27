@@ -48,6 +48,7 @@ RPC_NAMES = {
     "R7cb6c": "create_studio",
     "gArtLc": "poll_studio",
     "V5N4be": "delete_studio",
+    "v9rmvd": "get_interactive_html",
     "yyryJe": "generate_mind_map",
     "CYK0Xb": "save_mind_map",
     "cFji9": "list_mind_maps",
@@ -303,6 +304,7 @@ class NotebookLMClient:
     RPC_CREATE_STUDIO = "R7cb6c"   # Create Audio or Video Overview
     RPC_POLL_STUDIO = "gArtLc"     # Poll for studio content status
     RPC_DELETE_STUDIO = "V5N4be"   # Delete Audio or Video Overview
+    RPC_GET_INTERACTIVE_HTML = "v9rmvd"  # Fetch quiz/flashcard HTML content
 
     # Studio content types
     STUDIO_TYPE_AUDIO = constants.STUDIO_TYPE_AUDIO
