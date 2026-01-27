@@ -3849,23 +3849,64 @@ class NotebookLMClient:
             raise ArtifactParseError("data_table", details=str(e)) from e
         
     def _get_artifact_content(self, notebook_id: str, artifact_id: str) -> str | None:
-        """Fetch artifact HTML content for quiz/flashcard types."""
-        # This requires a specific RPC call: GET_INTERACTIVE_HTML (internal name?)
-        # Based on analysis: likely part of getting the artifact implementation details
-        # For now, we'll try to extract it from the artifact list metadata if possible
-        # or implement a specific fetch if needed.
-        # Actually, interactive artifacts usually load content via a separate request.
-        # Let's check typical patterns.
-        return None  # Placeholder until RPC identified
+        """Fetch artifact HTML content for quiz/flashcard types.
+
+        Args:
+            notebook_id: The notebook ID.
+            artifact_id: The artifact ID.
+
+        Returns:
+            HTML content string, or None if not found.
+        """
+        result = self._call_rpc(
+            self.RPC_GET_INTERACTIVE_HTML,
+            [artifact_id],
+            f"/notebook/{notebook_id}"
+        )
+
+        # Response structure: result[0] contains artifact data
+        # HTML content is at result[0][9][0]
+        if result and isinstance(result, list) and len(result) > 0:
+            data = result[0]
+            if isinstance(data, list) and len(data) > 9 and data[9]:
+                return data[9][0]
+        return None
 
     def _extract_app_data(self, html_content: str) -> dict:
-        """Extract JSON app data from interactive HTML."""
-        # Typical pattern: <script id="application-data" type="application/json">...</script>
+        """Extract JSON app data from interactive HTML.
+
+        Quiz and flashcard HTML contains embedded JSON in a data-app-data
+        attribute with HTML-encoded content (&quot; for quotes).
+
+        Args:
+            html_content: The HTML content string.
+
+        Returns:
+            Parsed JSON data as dict.
+
+        Raises:
+            ArtifactParseError: If data-app-data attribute not found or invalid JSON.
+        """
+        import html
         import re
-        match = re.search(r'<script id="application-data" type="application/json">(.*?)</script>', html_content)
-        if match:
-            return json.loads(match.group(1))
-        return {}
+
+        match = re.search(r'data-app-data="([^"]+)"', html_content)
+        if not match:
+            raise ArtifactParseError(
+                "interactive",
+                details="No data-app-data attribute found in HTML"
+            )
+
+        encoded_json = match.group(1)
+        decoded_json = html.unescape(encoded_json)
+
+        try:
+            return json.loads(decoded_json)
+        except json.JSONDecodeError as e:
+            raise ArtifactParseError(
+                "interactive",
+                details=f"Failed to parse JSON: {e}"
+            ) from e
 
     def _format_interactive_content(
         self,
