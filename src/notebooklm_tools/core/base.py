@@ -51,6 +51,7 @@ class BaseClient:
 
     BASE_URL = "https://notebooklm.google.com"
     BATCHEXECUTE_URL = f"{BASE_URL}/_/LabsTailwindUi/data/batchexecute"
+    UPLOAD_URL = "https://notebooklm.google.com/upload/_/"
 
     # =========================================================================
     # Known RPC IDs
@@ -65,6 +66,7 @@ class BaseClient:
     
     # Source operations
     RPC_ADD_SOURCE = "izAoDd"  # Used for URL, text, and Drive sources
+    RPC_ADD_SOURCE_FILE = "o4cbdc"  # Register file for resumable upload
     RPC_GET_SOURCE = "hizoJc"  # Get source details
     RPC_CHECK_FRESHNESS = "yR9Yof"  # Check if Drive source is stale
     RPC_SYNC_DRIVE = "FLmJqe"  # Sync Drive source with latest content
