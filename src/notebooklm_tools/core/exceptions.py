@@ -107,6 +107,19 @@ class ProfileNotFoundError(NLMError):
         self.profile_name = profile_name
 
 
+class FileUploadError(NLMError):
+    """Raised when file upload fails."""
+
+    def __init__(self, filename: str, message: str = ""):
+        self.filename = filename
+        super().__init__(f"Failed to upload '{filename}': {message}" if message else f"Failed to upload '{filename}'")
+
+
+class FileValidationError(NLMError):
+    """Raised when file validation fails before upload."""
+    pass
+
+
 def handle_api_error(status_code: int, response_data: dict[str, Any] | None = None) -> NLMError:
     """Convert API error response to appropriate exception."""
     if status_code == 401:
