@@ -2,8 +2,7 @@ import pytest
 import json
 from unittest.mock import MagicMock, patch
 import httpx
-from notebooklm_tools.core.client import NotebookLMClient
-from notebooklm_tools.core.exceptions import AuthenticationError
+from notebooklm_tools.core.client import NotebookLMClient, AuthenticationError
 
 @pytest.fixture
 def mock_client():

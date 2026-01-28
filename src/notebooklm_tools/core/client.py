@@ -18,7 +18,6 @@ from typing import Any, Callable
 import httpx
 
 from . import constants
-from .exceptions import AuthenticationError
 
 # Configure logger (API internals only logged at DEBUG level, usually disabled)
 logger = logging.getLogger("notebooklm_mcp.api")
@@ -43,37 +42,20 @@ from .data_types import (
 )
 
 
-class NotebookLMError(Exception):
-    """Base exception for NotebookLM errors."""
-    pass
+# Import exception classes from errors module (re-exported for backward compatibility)
+from .errors import (
+    NotebookLMError,
+    ArtifactError,
+    ArtifactNotReadyError,
+    ArtifactParseError,
+    ArtifactDownloadError,
+    ArtifactNotFoundError,
+    ClientAuthenticationError,
+)
 
-
-class ArtifactError(NotebookLMError):
-    """Base exception for artifact errors."""
-    pass
-
-
-class ArtifactNotReadyError(ArtifactError):
-    """Raised when an artifact is not ready for download."""
-    def __init__(self, artifact_type: str, artifact_id: str | None = None):
-        msg = f"{artifact_type} is not ready or does not exist"
-        if artifact_id:
-            msg += f" (ID: {artifact_id})"
-        super().__init__(msg)
-
-
-class ArtifactParseError(ArtifactError):
-    """Raised when artifact metadata cannot be parsed."""
-    def __init__(self, artifact_type: str, details: str = "", cause: Exception | None = None):
-        msg = f"Failed to parse {artifact_type} metadata: {details}"
-        super().__init__(msg)
-        self.__cause__ = cause
-
-
-class ArtifactDownloadError(ArtifactError):
-    """Raised when artifact download fails."""
-    def __init__(self, artifact_type: str, details: str = ""):
-        super().__init__(f"Failed to download {artifact_type}: {details}")
+# Backward compatibility alias - code importing AuthenticationError from client.py
+# will get the ClientAuthenticationError from errors.py
+AuthenticationError = ClientAuthenticationError
 
 # Timeout configuration (seconds)
 DEFAULT_TIMEOUT = 30.0  # Default for most operations
