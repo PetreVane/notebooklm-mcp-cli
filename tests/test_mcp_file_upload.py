@@ -17,7 +17,7 @@ class TestMCPSourceAddFile:
         assert hasattr(sources, 'source_add')
 
     def test_source_add_file_calls_client(self):
-        """Test that source_add file type calls client.upload_file correctly."""
+        """Test that source_add file type calls client.add_file correctly."""
         from notebooklm_tools.mcp.tools import sources
         from notebooklm_tools.mcp.tools import _utils
 
@@ -29,10 +29,9 @@ class TestMCPSourceAddFile:
         try:
             # Mock the client
             mock_client = MagicMock()
-            mock_client.upload_file.return_value = {
-                "source_id": "test-source-id",
-                "title": "test.txt",
-                "method": "resumable"
+            mock_client.add_file.return_value = {
+                "id": "test-source-id",
+                "title": "test.txt"
             }
 
             # Reset and patch get_client in sources module where it's imported
@@ -44,8 +43,8 @@ class TestMCPSourceAddFile:
                     file_path=temp_path
                 )
 
-            # Verify client.upload_file was called with correct args
-            mock_client.upload_file.assert_called_once_with("test-notebook-123", temp_path)
+            # Verify client.add_file was called with correct args
+            mock_client.add_file.assert_called_once_with("test-notebook-123", temp_path)
 
             # Verify return value
             assert result["status"] == "success"

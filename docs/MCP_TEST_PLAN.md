@@ -1,13 +1,17 @@
 # NotebookLM MCP - Comprehensive Test Plan
 
-**Purpose:** Verify all **26 consolidated MCP tools** work correctly.
+**Purpose:** Verify all **30 consolidated MCP tools** work correctly.
 
-**Version:** 2.0 (Updated 2026-01-28 after modular refactor)
+**Version:** 2.1 (Updated 2026-01-28 after notes API implementation)
+
+**Changes from v2.0:**
+- Added notes management: 4 new tools (`note_create`, `note_list`, `note_update`, `note_delete`)
+- Total tools: 26 → 30
 
 **Changes from v1:**
 - Tools consolidated: 46 → 26 (-43%)
 - `source_add(type=...)` replaces 4 source tools
-- `studio_create(type=...)` replaces 9 creation tools  
+- `studio_create(type=...)` replaces 9 creation tools
 - `download_artifact(type=...)` replaces 9 download tools
 
 **Prerequisites:**
@@ -722,7 +726,59 @@ Delete notebook [notebook_id] with confirm=True.
 
 ---
 
-## Summary: 26 Consolidated Tools
+## Test Group 11: Notes Management
+
+### Test 11.1 - Create Note
+**Tool:** `note_create`
+
+**Prompt:**
+```
+Create a note in notebook [notebook_id] with content "This is a test note about AI" and title "AI Note".
+```
+
+**Expected:** Note created with `note_id`.
+
+**Save:** Note the `note_id` for subsequent tests.
+
+---
+
+### Test 11.2 - List Notes
+**Tool:** `note_list`
+
+**Prompt:**
+```
+List all notes in notebook [notebook_id].
+```
+
+**Expected:** Array of notes including the one just created, with previews.
+
+---
+
+### Test 11.3 - Update Note
+**Tool:** `note_update`
+
+**Prompt:**
+```
+Update note [note_id] in notebook [notebook_id] with new content "Updated: AI is transforming technology".
+```
+
+**Expected:** Success confirmation.
+
+---
+
+### Test 11.4 - Delete Note
+**Tool:** `note_delete`
+
+**Prompt:**
+```
+Delete note [note_id] in notebook [notebook_id] with confirm=True.
+```
+
+**Expected:** Deletion confirmation message.
+
+---
+
+## Summary: 30 Consolidated Tools
 
 | Category | Tools | Count |
 |----------|-------|-------|
@@ -734,7 +790,8 @@ Delete notebook [notebook_id] with confirm=True.
 | **Studio** | `studio_create`, `studio_status`, `studio_delete` | 3 |
 | **Downloads** | `download_artifact` | 1 |
 | **Chat** | `notebook_query`, `chat_configure` | 2 |
-| **Total** | | **26** |
+| **Notes** | `note_create`, `note_list`, `note_update`, `note_delete` | 4 |
+| **Total** | | **30** |
 
 ---
 
@@ -774,7 +831,11 @@ Delete notebook [notebook_id] with confirm=True.
 31. Enable public link for notebook [id]
 32. Check deep research status
 33. Import deep research sources
-34. Delete all studio artifacts with confirm=True
-35. Delete all sources with confirm=True  
-36. Delete notebook [id] with confirm=True
+34. Create note in notebook [id]: content="Test note", title="My Note"
+35. List all notes in notebook [id]
+36. Update note [note_id] in notebook [id]: content="Updated content"
+37. Delete note [note_id] in notebook [id] with confirm=True
+38. Delete all studio artifacts with confirm=True
+39. Delete all sources with confirm=True
+40. Delete notebook [id] with confirm=True
 ```

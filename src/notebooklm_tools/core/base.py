@@ -98,6 +98,12 @@ class BaseClient:
     RPC_LIST_MIND_MAPS = "cFji9"       # List existing mind maps
     RPC_DELETE_MIND_MAP = "AH0mwd"     # Delete a mind map
 
+    # Notes RPCs (share RPC IDs with mind maps, differ by parameters)
+    RPC_CREATE_NOTE = "CYK0Xb"         # Create note from content (same as SAVE_MIND_MAP)
+    RPC_GET_NOTES = "cFji9"            # List notes and mind maps (same as LIST_MIND_MAPS)
+    RPC_UPDATE_NOTE = "cYAfTb"         # Update note content/title
+    RPC_DELETE_NOTE = "AH0mwd"         # Delete note permanently (same as DELETE_MIND_MAP)
+
     # Sharing RPCs
     RPC_SHARE_NOTEBOOK = "QDyure"    # Set sharing settings (visibility, collaborators)
     RPC_GET_SHARE_STATUS = "JFMDGd"  # Get current share status

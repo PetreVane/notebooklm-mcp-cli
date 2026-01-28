@@ -22,6 +22,7 @@ from .base import BaseClient, DEFAULT_TIMEOUT, SOURCE_ADD_TIMEOUT, logger
 from .conversation import ConversationMixin
 from .download import DownloadMixin
 from .notebooks import NotebookMixin
+from .notes import NotesMixin
 from .research import ResearchMixin
 from .sharing import SharingMixin
 from .sources import SourceMixin
@@ -69,9 +70,9 @@ OWNERSHIP_MINE = constants.OWNERSHIP_MINE
 OWNERSHIP_SHARED = constants.OWNERSHIP_SHARED
 
 
-class NotebookLMClient(ExportMixin, DownloadMixin, StudioMixin, ResearchMixin, ConversationMixin, SourceMixin, SharingMixin, NotebookMixin):
+class NotebookLMClient(ExportMixin, DownloadMixin, StudioMixin, ResearchMixin, ConversationMixin, SourceMixin, SharingMixin, NotebookMixin, NotesMixin):
     """Client for NotebookLM MCP internal API.
-    
+
     This class extends BaseClient with all domain-specific operations:
     - Notebook management (list, create, rename, delete)
     - Source management (add, sync, delete)
@@ -79,7 +80,8 @@ class NotebookLMClient(ExportMixin, DownloadMixin, StudioMixin, ResearchMixin, C
     - Studio content (audio, video, reports, flashcards, etc.)
     - Research operations
     - Sharing and collaboration
-    
+    - Notes management (create, list, update, delete)
+
     All HTTP/RPC infrastructure is provided by the BaseClient base class.
     """
     
@@ -152,6 +154,15 @@ class NotebookLMClient(ExportMixin, DownloadMixin, StudioMixin, ResearchMixin, C
     # - create_infographic, create_slide_deck
     # - create_report, create_flashcards, create_quiz
     # - create_data_table, generate_mind_map, save_mind_map, list_mind_maps
+
+    # =========================================================================
+    # Notes Operations (inherited from NotesMixin)
+    # =========================================================================
+    # The following methods are provided by NotesMixin:
+    # - create_note
+    # - list_notes
+    # - update_note
+    # - delete_note
 
     def close(self) -> None:
         """Close the HTTP client."""

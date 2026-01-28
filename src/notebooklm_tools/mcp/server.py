@@ -14,6 +14,7 @@ Tool Modules:
 - downloads.py: Artifact downloads with consolidated download_artifact
 - chat.py: Query and conversation management
 - exports.py: Export artifacts to Google Docs/Sheets
+- notes.py: Note management (create, list, update, delete)
 """
 
 import argparse
@@ -38,7 +39,8 @@ mcp = FastMCP(
 Consolidated tools:
 - source_add(type=url|text|drive|file): Add any source type
 - studio_create(type=audio|video|...): Create any artifact type
-- download_artifact(type=audio|video|...): Download any artifact type""",
+- download_artifact(type=audio|video|...): Download any artifact type
+- note_create/note_list/note_update/note_delete: Manage notes in notebooks""",
 )
 
 # MCP request/response logger
@@ -71,6 +73,7 @@ def _register_tools():
         studio,
         chat,
         exports,
+        notes,
     )
     
     # Register collected tools with mcp

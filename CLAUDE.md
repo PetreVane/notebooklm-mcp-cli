@@ -123,6 +123,7 @@ src/notebooklm_tools/
 | `research_import` | Import discovered sources into notebook |
 | `studio_create` | Generate unified content (audio, video, infographic, slides, etc.) |
 | `download_artifact` | Download any artifact (audio, video, pdf, markdown, json) |
+| `export_artifact` | Export Data Tables to Google Sheets or Reports to Google Docs |
 | `studio_status` | Check studio artifact generation status |
 | `studio_delete` | Delete studio artifacts (REQUIRES confirmation) |
 | `notebook_share_status` | Get sharing settings and collaborators |
@@ -130,6 +131,10 @@ src/notebooklm_tools/
 | `notebook_share_invite` | Invite collaborator by email |
 | `save_auth_tokens` | Save tokens extracted via Chrome DevTools MCP |
 | `refresh_auth` | Reload auth tokens or run headless auth |
+| `note_create` | Create a note in a notebook |
+| `note_list` | List all notes in a notebook |
+| `note_update` | Update a note's content or title |
+| `note_delete` | Delete a note (REQUIRES confirmation) |
 
 **IMPORTANT - Operations Requiring Confirmation:**
 - `notebook_delete` requires `confirm=True` - deletion is IRREVERSIBLE
@@ -137,11 +142,11 @@ src/notebooklm_tools/
 - `source_sync_drive` requires `confirm=True` - always show stale sources first via `source_list_drive`
 - All studio creation tools require `confirm=True` - show settings and get user approval first
 - `studio_delete` requires `confirm=True` - list artifacts first via `studio_status`, deletion is IRREVERSIBLE
+- `note_delete` requires `confirm=True` - deletion is IRREVERSIBLE
 
 ## Features NOT Yet Implemented
 
-- [ ] **Notes** - Save chat responses as notes
-- [ ] **Export** - Download content
+None - all NotebookLM features that can be accessed programmatically are implemented.
 
 ## Troubleshooting
 
