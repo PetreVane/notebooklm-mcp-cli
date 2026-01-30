@@ -287,11 +287,21 @@ class StudioMixin(BaseClient):
                             # Report content is typically markdown text
                             report_content = content_data[0] if isinstance(content_data[0], str) else None
 
-                # Flashcard artifacts have cards data at position 9
+                # Flashcard/Quiz artifacts have cards data at position 9
+                # Quiz and Flashcards share type code 4, distinguished by options[1][0]:
+                #   - Flashcards: options[1][0] == 1
+                #   - Quiz: options[1][0] == 2
                 flashcard_count = None
+                is_quiz = False
                 if type_code == self.STUDIO_TYPE_FLASHCARDS and len(artifact_data) > 9:
                     flashcard_options = artifact_data[9]
                     if isinstance(flashcard_options, list) and len(flashcard_options) > 1:
+                        inner_options = flashcard_options[1]
+                        if isinstance(inner_options, list) and len(inner_options) > 0:
+                            # Check format code: 1=flashcards, 2=quiz
+                            format_code = inner_options[0]
+                            if format_code == 2:
+                                is_quiz = True
                         # Count cards in the data
                         cards_data = flashcard_options[1] if isinstance(flashcard_options[1], list) else None
                         if cards_data:
@@ -315,12 +325,12 @@ class StudioMixin(BaseClient):
                     self.STUDIO_TYPE_AUDIO: "audio",
                     self.STUDIO_TYPE_REPORT: "report",
                     self.STUDIO_TYPE_VIDEO: "video",
-                    self.STUDIO_TYPE_FLASHCARDS: "flashcards",  # Also includes Quiz (type 4)
+                    self.STUDIO_TYPE_FLASHCARDS: "flashcards",  # Quiz also uses type 4, but detected via is_quiz
                     self.STUDIO_TYPE_INFOGRAPHIC: "infographic",
                     self.STUDIO_TYPE_SLIDE_DECK: "slide_deck",
                     self.STUDIO_TYPE_DATA_TABLE: "data_table",
                 }
-                artifact_type = type_map.get(type_code, "unknown")
+                artifact_type = "quiz" if is_quiz else type_map.get(type_code, "unknown")
                 status = "in_progress" if status_code == 1 else "completed" if status_code == 3 else "unknown"
 
                 artifacts.append({

@@ -18,6 +18,7 @@ pip install notebooklm-mcp-cli
 nlm login                         # Opens Chrome, extracts cookies automatically
 nlm login --profile work          # Named profile for multiple accounts
 nlm login --check                 # Check if authenticated
+nlm login switch <profile>        # Switch default profile
 nlm login profile list            # List all profiles with email addresses
 nlm login profile delete <name>   # Delete a profile
 nlm login profile rename <old> <new>  # Rename a profile
@@ -251,5 +252,5 @@ nlm download audio ai <artifact-id> --output podcast.mp3
 - Use `--wait` when adding sources to ensure they're ready before querying
 - Use aliases for frequently-used notebooks
 - Audio/video takes 1-5 minutes; poll with `nlm studio status`
-- Set `nlm config set auth.default_profile <name>` to avoid typing `--profile` every time
+- Use `nlm login switch <name>` to change the default profile
 - Run `nlm login profile list` to see all profiles with their associated email addresses

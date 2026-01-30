@@ -71,8 +71,9 @@ nlm login profile list
 #   work: jsmith@company.com
 #   personal: jsmith@gmail.com
 
-# Set default profile (no --profile flag needed)
-nlm config set auth.default_profile personal
+# Switch default profile (no --profile flag needed)
+nlm login switch personal
+# Output: ✓ Switched default profile to personal
 
 # Use profiles
 nlm notebook list                    # Uses default (personal)

@@ -333,6 +333,41 @@ def profile_rename(
         raise typer.Exit(1)
 
 
+@login_app.command("switch")
+def login_switch(
+    profile: str = typer.Argument(..., help="Profile name to switch to"),
+) -> None:
+    """Switch the default profile for all commands."""
+    from notebooklm_tools.core.auth import AuthManager
+    from notebooklm_tools.utils.config import get_config, save_config
+
+    # Check if profile exists
+    auth = AuthManager(profile)
+    if not auth.profile_exists():
+        console.print(f"[red]Error:[/red] Profile '{profile}' not found")
+        console.print("\nAvailable profiles:")
+        for name in AuthManager.list_profiles():
+            console.print(f"  [cyan]{name}[/cyan]")
+        raise typer.Exit(1)
+
+    # Update config
+    config = get_config()
+    old_profile = config.auth.default_profile
+    config.auth.default_profile = profile
+    save_config(config)
+
+    # Show confirmation with account info
+    try:
+        p = auth.load_profile()
+        email = p.email or "Unknown"
+        console.print(f"[green]✓[/green] Switched default profile to [cyan]{profile}[/cyan]")
+        console.print(f"  Account: {email}")
+        if old_profile != profile:
+            console.print(f"  [dim]Previous: {old_profile}[/dim]")
+    except Exception:
+        console.print(f"[green]✓[/green] Switched default profile to [cyan]{profile}[/cyan]")
+
+
 # Register profile commands under login
 login_app.add_typer(profile_app, name="profile")
 

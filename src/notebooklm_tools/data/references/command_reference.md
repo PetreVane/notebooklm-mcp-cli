@@ -74,6 +74,25 @@ Rename an authentication profile.
 nlm login profile rename <old-name> <new-name>
 ```
 
+### nlm login switch
+
+Switch the default profile for all commands.
+
+```bash
+nlm login switch <profile>
+```
+
+| Argument | Description |
+|----------|-------------|
+| `<profile>` | Profile name to switch to |
+
+**Example:**
+```bash
+nlm login switch work
+# Output: ✓ Switched default profile to work
+#         Account: jsmith@company.com
+```
+
 ---
 
 ## Notebook Commands
@@ -634,5 +653,9 @@ nlm config set <key> <value>
 **Example**: Set default profile to avoid typing `--profile` for every command:
 
 ```bash
+# Preferred method (simpler)
+nlm login switch work
+
+# Alternative method (via config)
 nlm config set auth.default_profile work
 ```

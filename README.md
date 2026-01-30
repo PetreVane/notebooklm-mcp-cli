@@ -244,10 +244,10 @@ nlm login --manual --file cookies.txt
 **Profile management:**
 ```bash
 nlm login --check                    # Show current auth status
+nlm login switch <profile>           # Switch the default profile
 nlm login profile list               # List all profiles with email addresses
 nlm login profile delete <profile>   # Delete a profile
 nlm login profile rename <old> <new> # Rename a profile
-nlm config set auth.default_profile work  # Set default profile
 ```
 
 Each profile gets its own isolated Chrome session, so you can be logged into multiple Google accounts simultaneously.

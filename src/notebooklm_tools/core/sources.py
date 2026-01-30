@@ -11,6 +11,8 @@ This mixin provides source-related operations:
 - upload_file: Upload local file via Chrome automation
 - get_source_guide: Get AI-generated summary and keywords
 - get_source_fulltext: Get raw text content of a source
+
+HTTP resumable upload implementation adapted from notebooklm-py.
 """
 
 from pathlib import Path
