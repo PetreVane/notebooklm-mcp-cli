@@ -9,9 +9,8 @@ This mixin provides note-related operations:
 """
 
 import json
-from typing import Any
+
 from .base import BaseClient
-from .utils import parse_timestamp
 
 
 class NotesMixin(BaseClient):
@@ -214,7 +213,7 @@ class NotesMixin(BaseClient):
         """
         # RPC format: [notebook_id, None, [note_id]]
         params = [notebook_id, None, [note_id]]
-        result = self._call_rpc(self.RPC_DELETE_NOTE, params, f"/notebook/{notebook_id}")
+        self._call_rpc(self.RPC_DELETE_NOTE, params, f"/notebook/{notebook_id}")
 
         # Returns null on success (soft-delete: clears content, keeps ID)
         return True  # If no exception was raised, consider it success

@@ -7,10 +7,12 @@ Run with: pytest tests/test_e2e.py -v
 Skip with: pytest tests/ -v --ignore=tests/test_e2e.py
 """
 
+import contextlib
 import os
 import time
-import pytest
 from pathlib import Path
+
+import pytest
 
 # Skip all E2E tests if NOTEBOOKLM_E2E env var is not set
 pytestmark = pytest.mark.skipif(
@@ -22,8 +24,8 @@ pytestmark = pytest.mark.skipif(
 @pytest.fixture(scope="module")
 def client():
     """Create a client with cached credentials."""
-    from notebooklm_tools.core.client import NotebookLMClient
     from notebooklm_tools.core.auth import load_cached_tokens
+    from notebooklm_tools.core.client import NotebookLMClient
     
     tokens = load_cached_tokens()
     if not tokens:
@@ -44,11 +46,9 @@ def test_notebook(client):
     
     yield notebook
     
-    # Cleanup
-    try:
+    # Cleanup (best effort)
+    with contextlib.suppress(Exception):
         client.delete_notebook(notebook.id)
-    except Exception:
-        pass  # Best effort cleanup
 
 
 class TestNotebookOperations:

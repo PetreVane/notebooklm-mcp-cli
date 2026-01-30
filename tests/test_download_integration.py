@@ -8,9 +8,11 @@ Run with: NOTEBOOKLM_E2E=1 pytest tests/test_download_integration.py -v
 
 import os
 import shutil
-import pytest
 from pathlib import Path
-from notebooklm_tools.core.client import NotebookLMClient, ArtifactNotReadyError
+
+import pytest
+
+from notebooklm_tools.core.client import ArtifactNotReadyError, NotebookLMClient
 
 # Target notebook ID provided by user
 NOTEBOOK_ID = "4085e211-fdb0-4802-b973-b43b9f99b6f7"
@@ -146,9 +148,8 @@ class TestMCPDownloads:
     def test_mcp_download_report(self, output_dir):
         # We need to mock get_client or ensure environment is set up
         # Since we are in the same process, we can patch get_client
-        from unittest.mock import patch
-        from notebooklm_tools.mcp.server import download_report
         from notebooklm_tools.core.auth import load_cached_tokens
+        from notebooklm_tools.mcp.server import download_report
         
         # Setup tokens specifically for MCP tool which uses get_client() logic
         tokens = load_cached_tokens()
