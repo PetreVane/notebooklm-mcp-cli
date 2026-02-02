@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.11] - 2026-02-02
+
+### Fixed
+- **`nlm login` not launching Chrome** - Running `nlm login` without arguments now properly launches Chrome for authentication instead of showing help. Workaround for v0.2.10: use `nlm login -p default`.
+
+## [0.2.10] - 2026-01-31
+
+### Fixed
+- **Version mismatch** - Synchronized version numbers across all package files
+
+## [0.2.9] - 2026-01-31
+
+### Changed
+- **Documentation alignment** - Unified MCP and CLI documentation with comprehensive test plan
+- **Build configuration** - Moved dev dependencies to optional-dependencies for standard compatibility
+
+### Fixed
+- **Studio custom focus prompt** - Extract custom focus prompt from correct position in API response
+
 ## [0.2.7] - 2026-01-30
 
 ### Removed
