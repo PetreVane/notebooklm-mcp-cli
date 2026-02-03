@@ -1,7 +1,7 @@
 """End-to-end tests for NotebookLM Tools.
 
 These tests run against the real NotebookLM API using cached credentials.
-They require valid authentication (run `nlm login` or `notebooklm-mcp-auth` first).
+They require valid authentication (run `nlm login` first).
 
 Run with: pytest tests/test_e2e.py -v
 Skip with: pytest tests/ -v --ignore=tests/test_e2e.py

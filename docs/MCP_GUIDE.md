@@ -25,7 +25,7 @@ nlm login
 
 Or use the standalone auth tool:
 ```bash
-notebooklm-mcp-auth
+nlm login
 ```
 
 ---

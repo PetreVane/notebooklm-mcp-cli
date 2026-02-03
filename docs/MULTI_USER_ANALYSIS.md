@@ -570,7 +570,7 @@ This ensures conversation history is properly isolated per user.
 
 ```bash
 # Run authentication (one-time setup)
-notebooklm-mcp-auth
+nlm login
 ```
 
 ### Step 2: Start MCP Server

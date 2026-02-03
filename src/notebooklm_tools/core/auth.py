@@ -145,7 +145,7 @@ def extract_tokens_via_chrome_devtools() -> AuthTokens | None:
 
     raise NotImplementedError(
         "Direct Chrome DevTools extraction not implemented. "
-        "Use the 'notebooklm-mcp-auth' CLI command instead."
+        "Use the 'nlm login' CLI command instead."
     )
 
 
@@ -197,7 +197,7 @@ def extract_session_id_from_page(html: str) -> str | None:
 #
 # Usage:
 #   1. Make sure Chrome is open with DevTools MCP connected
-#   2. Run: notebooklm-mcp-auth
+#   2. Run: nlm login
 #   3. If not logged in, log in via the Chrome window
 #   4. Tokens are cached to ~/.notebooklm-mcp-cli/auth.json
 #   5. Start the MCP server - it will use cached tokens

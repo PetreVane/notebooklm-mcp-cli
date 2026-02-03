@@ -92,7 +92,7 @@ src/notebooklm_tools/
 ├── core/client.py   # Internal API client
 ├── core/constants.py # Code-name mappings (CodeMapper class)
 ├── core/auth.py     # AuthManager for profile-based token caching
-├── core/auth_cli.py # CLI for Chrome-based auth (notebooklm-mcp-auth)
+├── utils/cdp.py     # Chrome DevTools Protocol for headless auth
 └── utils/
     ├── config.py    # Configuration and storage paths (profile isolation)
     └── cdp.py       # Chrome DevTools Protocol for cookie/email extraction
@@ -110,7 +110,6 @@ src/notebooklm_tools/
 **Executables:**
 - `nlm` - Command-line interface
 - `notebooklm-mcp` - The MCP server
-- `notebooklm-mcp-auth` - CLI for extracting tokens (requires closing Chrome)
 
 ## MCP Tools Provided
 

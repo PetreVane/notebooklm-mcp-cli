@@ -30,8 +30,7 @@ This method launches Chrome automatically and extracts cookies after you log in.
 # 1. Close Chrome completely (Cmd+Q on Mac, or quit from taskbar)
 
 # 2. Run the auth command (CLI or standalone)
-nlm login                      # CLI (recommended)
-notebooklm-mcp-auth            # Standalone tool
+nlm login                      # Recommended
 
 # 3. Log in to your Google account in the browser window that opens
 
@@ -42,7 +41,6 @@ If your DevTools endpoint is slow to respond, you can increase the timeout:
 
 ```bash
 nlm login --devtools-timeout 15
-notebooklm-mcp-auth --devtools-timeout 15
 ```
 
 ### What Happens Behind the Scenes
@@ -113,10 +111,10 @@ This method lets you manually extract and provide cookies. Use this if:
 
 ```bash
 # Option A: Interactive mode (shows instructions, prompts for file path)
-notebooklm-mcp-auth --file
+nlm login --manual
 
 # Option B: Direct file path
-notebooklm-mcp-auth --file /path/to/cookies.txt
+nlm login --manual --file /path/to/cookies.txt
 ```
 
 ### How to Extract Cookies Manually
@@ -213,7 +211,7 @@ Then restart your AI assistant.
 - **CSRF token:** Auto-refreshed on each MCP client initialization
 - **Session ID:** Auto-refreshed on each MCP client initialization
 
-When you start seeing authentication errors, simply run `notebooklm-mcp-auth` again to refresh.
+When you start seeing authentication errors, simply run `nlm login` again to refresh.
 
 ---
 
@@ -227,7 +225,7 @@ Close Chrome completely and try again. On Mac, use **Cmd+Q** to fully quit.
 
 Try file mode instead:
 ```bash
-notebooklm-mcp-auth --file
+nlm login --manual
 ```
 
 ### "401 Unauthorized" or "403 Forbidden" errors
@@ -238,7 +236,7 @@ Your cookies have expired. Run the auth command again to refresh.
 
 Some Chrome extensions or tools modify Chrome's behavior. Use file mode:
 ```bash
-notebooklm-mcp-auth --file
+nlm login --manual
 ```
 
 ### Cookie file shows "missing required cookies"

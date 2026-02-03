@@ -46,15 +46,15 @@ Cookies typically expire after 2-4 weeks. Symptoms:
 ### How to fix
 Re-extract fresh cookies using one of these methods:
 
-**Option A: notebooklm-mcp-auth CLI (recommended)**
+**Option A: nlm login CLI (recommended)**
 
 The built-in authentication CLI automatically launches Chrome, navigates to NotebookLM, and extracts cookies:
 
 ```bash
-notebooklm-mcp-auth
+nlm login
 ```
 
-If Chrome is not running, it will be launched automatically. If you're not logged in, the CLI waits for you to complete login in the browser window. Tokens are cached to `~/.notebooklm-mcp/auth.json`.
+If Chrome is not running, it will be launched automatically. If you're not logged in, the CLI waits for you to complete login in the browser window. Tokens are cached to your profile directory.
 
 **Option B: Chrome DevTools MCP**
 

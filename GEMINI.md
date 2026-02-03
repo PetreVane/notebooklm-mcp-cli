@@ -36,7 +36,7 @@ uv tool install .
 
 **Preferred: Run the automated authentication CLI:**
 ```bash
-notebooklm-mcp-auth
+nlm login
 ```
 This launches Chrome, you log in, and cookies are extracted automatically. Your login is saved to a Chrome profile for future use.
 
@@ -46,7 +46,7 @@ The server now automatically handles token expiration:
 2. Reloads cookies from disk if updated externally
 3. Runs headless Chrome auth if profile has saved login
 
-If headless auth fails (Google login fully expired), you'll see a message to run `notebooklm-mcp-auth` again.
+If headless auth fails (Google login fully expired), you'll see a message to run `nlm login` again.
 
 **Explicit refresh (MCP tool):**
 ```
@@ -112,7 +112,7 @@ uv run pytest tests/test_api_client.py
     - `core/client.py`: The core logic. Contains the internal API calls.
     - `core/constants.py`: Single source of truth for all API code-name mappings.
     - `core/auth.py`: Handles token validation, storage, and loading.
-    - `core/auth_cli.py`: Implementation of the `notebooklm-mcp-auth` CLI.
+    - `utils/cdp.py`: Chrome DevTools Protocol for cookie extraction and headless auth.
     - `utils/`: Configuration and browser utilities
 - `CLAUDE.md`: Contains detailed documentation on the internal RPC IDs and protocol specifics. **Refer to this file for API deep dives.**
 - `pyproject.toml`: Project configuration and dependencies.

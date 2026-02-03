@@ -379,7 +379,7 @@ class NotebookLMClient:
             # Check if redirected to login (cookies expired)
             if "accounts.google.com" in str(response.url):
                 raise ValueError(
-                    "Authentication expired. AI assistants: Run `notebooklm-mcp-auth` via Bash/terminal tool to re-authenticate automatically. Users: Run `notebooklm-mcp-auth` in your terminal."
+                    "Authentication expired. AI assistants: Run `nlm login` via Bash/terminal tool to re-authenticate automatically. Users: Run `nlm login` in your terminal."
                 )
 
             if response.status_code != 200:
@@ -663,7 +663,7 @@ class NotebookLMClient:
             
             # All recovery attempts failed
             raise AuthenticationError(
-                "Authentication expired. Run 'notebooklm-mcp-auth' in your terminal to re-authenticate."
+                "Authentication expired. Run 'nlm login' in your terminal to re-authenticate."
             )
 
     def _try_reload_or_headless_auth(self) -> bool:
@@ -679,7 +679,7 @@ class NotebookLMClient:
             cached = load_cached_tokens()
             if cached and cached.cookies:
                 # Always reload from disk when auth fails - current tokens are known-bad
-                # The cached tokens may be fresher (user ran notebooklm-mcp-auth)
+                # The cached tokens may be fresher (user ran nlm login)
                 # or the same, but worth retrying with a fresh CSRF token extraction
                 self.cookies = cached.cookies
                 self.csrf_token = ""  # Force re-extraction of CSRF token
@@ -688,7 +688,7 @@ class NotebookLMClient:
         
         # Try headless auth if Chrome profile exists
         try:
-            from .auth_cli import run_headless_auth
+            from notebooklm_tools.utils.cdp import run_headless_auth
             tokens = run_headless_auth()
             if tokens:
                 self.cookies = tokens.cookies

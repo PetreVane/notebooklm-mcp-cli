@@ -32,7 +32,7 @@ def refresh_auth() -> dict[str, Any]:
 
         # Try headless auth if Chrome profile exists
         try:
-            from notebooklm_tools.core.auth_cli import run_headless_auth
+            from notebooklm_tools.utils.cdp import run_headless_auth
 
             tokens = run_headless_auth()
             if tokens:

@@ -54,14 +54,6 @@ notebooklm-mcp --transport http --debug
 --debug           Enable debug logging
 ```
 
-### notebooklm-mcp-auth
-```
---file [PATH]       Import cookies from file
---port PORT         Chrome DevTools port (default: 9222)
---show-tokens       Show cached tokens
---no-auto-launch    Don't auto-launch Chrome
-```
-
 ## Environment Variables
 
 ```bash
@@ -78,7 +70,6 @@ NOTEBOOKLM_MCP_DEBUG=true
 ```bash
 # Test help
 notebooklm-mcp --help
-notebooklm-mcp-auth --help
 
 # Start HTTP server
 notebooklm-mcp --transport http

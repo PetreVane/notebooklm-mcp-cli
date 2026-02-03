@@ -480,7 +480,7 @@ def cli_main():
         if isinstance(e, (AuthenticationError, ClientAuthenticationError)):
             console.print(f"\n[red]✗ Authentication Error[/red]")
             console.print(f"  {str(e)}")
-            console.print(f"\n[yellow]→[/yellow] Run [cyan]nlm login[/cyan] or [cyan]notebooklm-mcp-auth[/cyan] to re-authenticate\n")
+            console.print(f"\n[yellow]→[/yellow] Run [cyan]nlm login[/cyan] to re-authenticate\n")
             raise typer.Exit(1)
 
         # Handle other NLM errors cleanly

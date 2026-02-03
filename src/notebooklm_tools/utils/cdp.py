@@ -510,3 +510,174 @@ def extract_cookies_via_cdp(
         "session_id": session_id,
         "email": email,
     }
+
+
+# =============================================================================
+# Headless Authentication (for automatic token refresh)
+# =============================================================================
+
+def has_chrome_profile(profile_name: str = "default") -> bool:
+    """Check if a Chrome profile with saved login exists.
+    
+    Returns True if the profile directory exists and has login cookies,
+    indicating that the user has previously authenticated.
+    """
+    profile_dir = get_chrome_profile_dir(profile_name)
+    # Check for Cookies file which indicates the profile has been used
+    cookies_file = profile_dir / "Default" / "Cookies"
+    return cookies_file.exists()
+
+
+def cleanup_chrome_profile_cache(profile_name: str = "default") -> int:
+    """Remove unnecessary cache directories to minimize profile size.
+    
+    Keeps cookies and login data intact while removing caches that can
+    grow to hundreds of MB. Safe to run after successful authentication.
+    
+    Args:
+        profile_name: The profile name to clean up.
+        
+    Returns:
+        Number of bytes freed.
+    """
+    profile_dir = get_chrome_profile_dir(profile_name)
+    
+    # Cache directories that are safe to remove (not needed for auth)
+    cache_dirs = [
+        "Cache",
+        "Code Cache", 
+        "Service Worker",
+        "GPUCache",
+        "DawnWebGPUCache",
+        "DawnGraphiteCache",
+        "ShaderCache",
+        "GrShaderCache",
+    ]
+    
+    bytes_freed = 0
+    default_dir = profile_dir / "Default"
+    
+    for cache_dir in cache_dirs:
+        cache_path = default_dir / cache_dir
+        if cache_path.exists():
+            try:
+                # Calculate size before deletion
+                size = sum(f.stat().st_size for f in cache_path.rglob("*") if f.is_file())
+                shutil.rmtree(cache_path, ignore_errors=True)
+                bytes_freed += size
+            except Exception:
+                pass
+    
+    return bytes_freed
+
+
+def run_headless_auth(
+    port: int = 9223,
+    timeout: int = 30,
+    profile_name: str = "default",
+) -> "AuthTokens | None":
+    """Run authentication in headless mode (no user interaction).
+    
+    This only works if the Chrome profile already has saved Google login.
+    The Chrome process is automatically terminated after token extraction.
+    
+    Used for automatic token refresh when cached tokens expire.
+    
+    Args:
+        port: Chrome DevTools port (use different port to avoid conflicts)
+        timeout: Maximum time to wait for auth extraction
+        profile_name: The profile name to use for Chrome
+        
+    Returns:
+        AuthTokens if successful, None if failed or no saved login
+    """
+    # Import here to avoid circular imports
+    from notebooklm_tools.core.auth import AuthTokens, save_tokens_to_cache, validate_cookies
+    
+    # Check if profile exists with saved login
+    if not has_chrome_profile(profile_name):
+        return None
+
+    chrome_process: subprocess.Popen | None = None
+    chrome_was_running = False
+
+    try:
+        # Try to connect to existing Chrome first
+        debugger_url = get_debugger_url(port)
+
+        if debugger_url:
+            # Chrome already running - use existing instance
+            chrome_was_running = True
+        else:
+            # No Chrome running - launch in headless mode
+            chrome_process = launch_chrome_process(port, headless=True, profile_name=profile_name)
+            if not chrome_process:
+                return None
+
+            # Wait for Chrome debugger to be ready
+            for _ in range(5):  # Try up to 5 times
+                debugger_url = get_debugger_url(port)
+                if debugger_url:
+                    break
+                time.sleep(1)
+
+            if not debugger_url:
+                return None
+        
+        # Find or create NotebookLM page
+        page = find_or_create_notebooklm_page(port)
+        if not page:
+            return None
+        
+        ws_url = page.get("webSocketDebuggerUrl")
+        if not ws_url:
+            return None
+        
+        # Check if logged in by URL
+        current_url = get_current_url(ws_url)
+        if not is_logged_in(current_url):
+            # Not logged in - headless can't help
+            return None
+        
+        # Extract cookies
+        cookies_list = get_page_cookies(ws_url)
+        cookies = {c["name"]: c["value"] for c in cookies_list}
+        
+        if not validate_cookies(cookies):
+            return None
+        
+        # Get page HTML for CSRF extraction
+        html = get_page_html(ws_url)
+        csrf_token = extract_csrf_token(html)
+        session_id = extract_session_id(html)
+        
+        # Create and save tokens
+        tokens = AuthTokens(
+            cookies=cookies,
+            csrf_token=csrf_token or "",
+            session_id=session_id or "",
+            extracted_at=time.time(),
+        )
+        save_tokens_to_cache(tokens)
+        
+        # Clean up cache to minimize profile size
+        cleanup_chrome_profile_cache(profile_name)
+        
+        return tokens
+        
+    except Exception:
+        return None
+        
+    finally:
+        # IMPORTANT: Only terminate Chrome if we launched it
+        # Don't terminate if we connected to existing Chrome instance
+        if chrome_process and not chrome_was_running:
+            try:
+                chrome_process.terminate()
+                chrome_process.wait(timeout=5)
+            except Exception:
+                # Force kill if terminate didn't work
+                try:
+                    chrome_process.kill()
+                except Exception:
+                    pass

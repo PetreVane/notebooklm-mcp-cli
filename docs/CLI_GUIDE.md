@@ -111,7 +111,7 @@ nlm download audio <notebook> <artifact-id> --output podcast.mp3
 nlm download video <notebook> <artifact-id> --output video.mp4
 nlm download report <notebook> <artifact-id> --output report.md
 nlm download mind-map <notebook> <artifact-id> --output mindmap.json
-nlm download slides <notebook> <artifact-id> --output slides.pdf
+nlm download slide-deck <notebook> <artifact-id> --output slides.pdf
 nlm download infographic <notebook> <artifact-id> --output infographic.png
 nlm download data-table <notebook> <artifact-id> --output data.csv
 

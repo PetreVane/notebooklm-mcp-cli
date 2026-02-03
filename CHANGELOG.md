@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.12] - 2026-02-03
+
+### Removed
+- **`notebooklm-mcp-auth` standalone command** - The standalone authentication tool has been officially deprecated and removed. Use `nlm login` instead, which provides all the same functionality with additional features like named profiles. The headless auth for automatic token refresh continues to work behind the scenes.
+
+### Fixed
+- **Auth storage inconsistency** - Previously, `notebooklm-mcp-auth` stored tokens in a different location than `nlm login`, causing "Authentication expired" errors. Now there's only one auth path via `nlm login`.
+- **Documentation typo** - Fixed `nlm download slides` → `nlm download slide-deck` in CLI guide.
+
 ## [0.2.11] - 2026-02-02
 
 ### Fixed

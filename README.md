@@ -108,7 +108,6 @@ pipx install notebooklm-mcp-cli
 **After installation, you get:**
 - `nlm` — Command-line interface
 - `notebooklm-mcp` — MCP server for AI assistants
-- `notebooklm-mcp-auth` — Standalone authentication tool
 
 <details>
 <summary>Alternative: Install from Source</summary>
@@ -189,7 +188,6 @@ You should see only:
 notebooklm-mcp-cli v0.2.0
 - nlm
 - notebooklm-mcp
-- notebooklm-mcp-auth
 ```
 
 ### Step 5: Re-authenticate
@@ -265,8 +263,8 @@ Each profile gets its own isolated Chrome session, so you can be logged into mul
 If you only need the MCP server (not the CLI):
 
 ```bash
-notebooklm-mcp-auth          # Auto mode (launches Chrome)
-notebooklm-mcp-auth --file   # Manual file mode
+nlm login              # Auto mode (launches Chrome)
+nlm login --manual     # Manual file mode
 ```
 
 **How it works:** Auto mode launches a dedicated Chrome profile, you log in to Google, and cookies are extracted automatically. Your login persists for future auth refreshes.
@@ -385,7 +383,7 @@ Simply chat with your AI tool (Claude Code, Cursor, Gemini CLI) using natural la
 
 You can also call `refresh_auth()` to explicitly reload tokens.
 
-If automatic refresh fails (Google login fully expired), run `notebooklm-mcp-auth` again.
+If automatic refresh fails (Google login fully expired), run `nlm login` again.
 
 ## Troubleshooting
 
