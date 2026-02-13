@@ -48,7 +48,7 @@ from notebooklm_tools.cli.commands.studio import (
 )
 from notebooklm_tools.cli.commands.research import (
     start_research,
-    research_status,
+    check_status as research_status,
     import_research,
 )
 from notebooklm_tools.cli.commands.chat import (
