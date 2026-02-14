@@ -49,6 +49,9 @@ Connect AI assistants (Claude, Gemini, Cursor, etc.) to NotebookLM:
 nlm setup add claude-code
 nlm setup add gemini
 nlm setup add cursor
+nlm setup add cline
+nlm setup add antigravity
+```
 ```
 
 Then use natural language: *"Create a notebook about quantum computing and generate a podcast"*
@@ -67,6 +70,7 @@ Then use natural language: *"Create a notebook about quantum computing and gener
 | Share notebook | `nlm share public/invite` | `notebook_share_*` |
 | Sync Drive sources | `nlm source sync` | `source_sync_drive` |
 | Configure AI tools | `nlm setup add/remove/list` | — |
+| Install AI Skills | `nlm skill install/update` | — |
 | Diagnose issues | `nlm doctor` | — |
 
 📚 **More Documentation:**
@@ -300,6 +304,21 @@ nlm setup list
 
 # Diagnose installation & auth issues
 nlm doctor
+```
+
+### Install AI Skills (Optional)
+
+Install the NotebookLM expert guide for your AI assistant to help it use the tools effectively. Supported for **Cline**, **Antigravity**, **OpenClaw**, **Codex**, **OpenCode**, **Claude Code**, and **Gemini CLI**.
+
+```bash
+# Install skill files
+nlm skill install cline
+nlm skill install openclaw
+nlm skill install codex
+nlm skill install antigravity
+
+# Update skills
+nlm skill update
 ```
 
 ### Remove from a tool

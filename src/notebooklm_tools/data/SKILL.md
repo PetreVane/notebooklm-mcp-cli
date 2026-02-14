@@ -469,6 +469,20 @@ nlm login switch work                        # Switch default profile
 | `auth.browser` | `auto` | Browser for login (auto, chrome, chromium) |
 | `auth.default_profile` | `default` | Profile to use when `--profile` not specified |
 
+### 11. Skill Management
+
+Manage the NotebookLM skill installation for various AI assistants:
+
+```bash
+nlm skill list                              # Show installation status
+nlm skill update                            # Update all outdated skills
+nlm skill update <tool>                     # Update specific skill (e.g., claude-code)
+nlm skill install <tool>                    # Install skill
+nlm skill uninstall <tool>                  # Uninstall skill
+```
+
+**Verb-first aliases**: `nlm update skill`, `nlm list skills`, `nlm install skill`
+
 ## Output Formats
 
 Most list commands support multiple formats:

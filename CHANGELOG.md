@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-02-14
+
+### Added
+- **New AI Client Support** — Added `nlm skill install` support for:
+  - **Cline** (`~/.cline/skills`) - Terminal-based AI agent
+  - **Antigravity** (`~/.gemini/antigravity/skills`) - Advanced agentic framework
+  - **OpenClaw** (`~/.openclaw/skills`) - Autonomous AI agent
+  - **Codex** (`~/.codex/AGENTS.md`) - Now with version tracking
+- **`nlm setup` support** — Added automatic MCP configuration for:
+  - **Cline** (`nlm setup add cline`)
+  - **Antigravity** (`nlm setup add antigravity`)
+- **`nlm skill update` command** - Update installed AI skills to the latest version. Supports updating all skills or specific tools (e.g., `nlm skill update claude-code`).
+- **Verb-first alias** - `nlm update skill` works identically to `nlm skill update`.
+- **Version tracking** - `AGENTS.md` formats now support version tracking via injected comments.
+
+### Fixed
+- **Skill version validation** - `nlm skill list` now correctly identifies outdated skills and prevents "unknown" version status for Codex.
+- **Package version** - Bumped to `0.3.1` to match release tag.
+
 ## [0.3.0] - 2026-02-13
 
 ### Added

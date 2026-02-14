@@ -13,6 +13,8 @@ description: How to create a new release of notebooklm-mcp-cli
 2. Bump version in both files:
    - `pyproject.toml` → `version = "X.Y.Z"`
    - `src/notebooklm_tools/__init__.py` → `__version__ = "X.Y.Z"`
+   - `src/notebooklm_tools/data/SKILL.md` (frontmatter) → `version: "X.Y.Z"`
+   - `src/notebooklm_tools/data/AGENTS_SECTION.md` (comment) → `<!-- nlm-version: X.Y.Z -->`
 
 3. Update `CHANGELOG.md` with the new version entry
 
@@ -50,7 +52,7 @@ gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes
 
 ## Checklist
 
-- [ ] Version bumped in `pyproject.toml` and `__init__.py`
+- [ ] Version bumped in `pyproject.toml`, `__init__.py`, `SKILL.md`, and `AGENTS_SECTION.md`
 - [ ] CHANGELOG updated
 - [ ] Docs reviewed and updated (README, CLI Guide, ai_docs.py, SKILL.md, command_reference.md)
 - [ ] Tests pass (`uv run python -m pytest`)

@@ -49,6 +49,7 @@ from notebooklm_tools.cli.commands.verbs import (
     show_app,
     install_app,
     uninstall_app,
+    update_app,
 )
 
 console = Console()
@@ -461,6 +462,7 @@ app.add_typer(set_app, name="set", help="Set values (aliases, config)")
 app.add_typer(show_app, name="show", help="Show information")
 app.add_typer(install_app, name="install", help="Install resources (skills)")
 app.add_typer(uninstall_app, name="uninstall", help="Uninstall resources (skills)")
+app.add_typer(update_app, name="update", help="Update resources (skills)")
 
 
 @app.callback(invoke_without_command=True)
